@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="icon" type="image/png" href="image/icon.png"/>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" integrity="sha512-KfkfwYDsLkIlwQp6LFnl8zNdLGxu9YAA1QvwINks4PhcElQSvqcyVLLD9aMhXd13uQjoXtEKNosOWaZqXgel0g==" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+</head>
+<body>
+    <div class="member-container">
+        <div class="member-title">
+            <i class="fa-solid fa-circle-user"></i><span>สมาชิกในแชท</span>
+        </div>
+        <div class="member-list">
+            <!-- User Profile -->
+            <!-- <div class="member-profile">
+                <div class="member-image">
+                    <img src="image/4.png" alt="">
+                </div>
+                <span>โรตี20บาท</span>
+            </div> -->
+        </div>
+    </div>
+    <div class="chat-container">
+        <div id="show-message">
+            <!-- Message Box -->
+            <!-- <div class="message-box">
+                <div class="message-icon">
+                    <img src="image/0.png" alt="">
+                </div>
+                <div class="message-detail">
+                    <h6>63103774</h6>
+                    <div class="message-msg">
+                        Hello
+                    </div>
+                </div>
+            </div> -->
+            <!-- Self Message Box -->
+            <!-- <div class="message-box my-message">
+                <div class="message-icon">
+                    <img src="image/0.png" alt="">
+                </div>
+                <div class="message-detail">
+                    <h6>63103774</h6>
+                    <div class="message-msg">
+                        Hi, There!
+                    </div>
+                </div>
+            </div> -->
+        </div>
+        <div class="input-box">
+            <div class="message-input">
+                <i class="fa-solid fa-list-ul"></i>
+                <input type="text" name="message" id="message" placeholder="คลิ๊กซ้ายเพื่อใส่ข้อความ" maxlength="40">
+                <i class="fa-solid fa-face-smile"></i>
+            </div>
+            <button id="btn-send" onclick="send_message()"><i class="fa-solid fa-o"></i>ส่ง</button>    
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="socket.io.min.js"></script>
+    <script>
+        let profile_id = prompt("Please enter your student id");
+
+        var socket = io.connect('192.168.1.30:7103');
+
+        socket.on('connect', function () {
+            // console.log("connected");
+            socket.emit("source", profile_id);
+        });
+
+        socket.on('checkpoint', function (msg) {
+            console.log(msg);
+            // $("#show-message").append(`<h6><h6>`);
+            $("#show-message").append(`<h6 class="join-message">${msg.id} เข้าร่วมแชท<h6>`);
+            $(".member-list").append(`<div class="member-profile" id="p-${msg.id}">
+                <div class="member-image">
+                    <img src="image/${msg.profile}.png" alt="">
+                </div>
+                <span>${msg.id}</span>
+            </div>`);
+        });
+
+        socket.on('show_my_message', function (msg) {
+            console.log(msg);
+            // $("#show-message").append(`<h6 style="color:#ccc; text-align:end;">${msg.id}<h6>`);
+            $("#show-message").append(`<div class="message-box my-message">
+                <div class="message-icon">
+                    <img src="image/${msg.profile}.png" alt="">
+                </div>
+                <div class="message-detail">
+                    <h6>${msg.id}</h6>
+                    <div class="message-msg">
+                        ${msg.message}
+                    </div>
+                </div>
+            </div>`);
+            // $("#show-message").append(`<h1 style="line-height:16px; text-align:end;">${msg.message}</h1><br>`);
+        });
+
+        socket.on('show_message', function (msg) {
+            console.log(msg);
+            $("#show-message").append(`<div class="message-box">
+                <div class="message-icon">
+                    <img src="image/${msg.profile}.png" alt="">
+                </div>
+                <div class="message-detail">
+                    <h6>${msg.id}</h6>
+                    <div class="message-msg">
+                        ${msg.message}
+                    </div>
+                </div>
+            </div>`);
+            // $("#show-message").append(`<h1 style="line-height:16px;">${msg.message}</h1><br>`);
+        });
+
+        socket.on('checkout', function(msg){
+            console.log(msg);
+            $("#show-message").append(`<h6 class="left-message">${msg.id} ออกจากแชท<h6>`);
+            $("div").remove(`#p-${msg.id}`);
+        });
+
+        function send_message(){
+            var message = document.getElementById("message");
+            if(message.value){
+                socket.emit("my_message", message.value);
+                message.value = "";
+            }
+        }
+    </script>
+</body>
+</html>
